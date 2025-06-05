@@ -1,0 +1,44 @@
+# Core dependencies
+langchain==0.1.0
+langchain-community==0.0.10
+openai==1.7.2
+python-dotenv==1.0.0
+
+# Vector database
+pymilvus==2.3.4
+
+# Knowledge graph
+# neo4j==5.15.0
+# py2neo==2021.2.3
+
+# Document processing
+pypdf==3.17.4
+python-docx==1.1.0
+beautifulsoup4==4.12.2
+requests==2.31.0
+
+# Text processing
+sentence-transformers==2.2.2
+transformers==4.36.2
+torch==2.1.2
+
+# Data processing
+pandas==2.1.4
+numpy==1.24.3
+
+# Utilities
+tqdm==4.66.1
+pydantic==2.5.2
+loguru==0.7.2
+
+# LLM APIs
+zhipuai==2.0.1
+httpx==0.26.0
+
+# Knowledge Graph
+networkx==3.2.1
+spacy==3.7.2
+
+# Optional: Streamlit for UI
+streamlit==1.29.0
+plotly==5.17.0 
