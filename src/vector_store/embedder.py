@@ -40,7 +40,7 @@ class EmbeddingGenerator:
     
     def _detect_model_type(self) -> str:
         """自动检测模型类型"""
-        if "zhipuai" in self.model_name.lower():
+        if "zhipuai" in self.model_name.lower() or "embedding-3" in self.model_name.lower() or "embedding-2" in self.model_name.lower():
             return "zhipuai"
         elif "text-embedding" in self.model_name.lower():
             return "openai"
@@ -64,13 +64,23 @@ class EmbeddingGenerator:
             elif self.model_type == "zhipuai":
                 logger.info(f"配置ZhipuAI嵌入模型: {self.model_name}")
                 zhipuai.api_key = self.settings.zhipuai_api_key
-                # ZhipuAI embedding-3 的维度
-                if "embedding-3" in self.model_name:
+                
+                # 处理模型名称映射
+                if "zhipuai-embedding-3" in self.model_name:
+                    self.api_model_name = "embedding-3"
+                    self.embedding_dim = 2048
+                elif "zhipuai-embedding-2" in self.model_name:
+                    self.api_model_name = "embedding-2"
+                    self.embedding_dim = 1024
+                elif "embedding-3" in self.model_name:
+                    self.api_model_name = "embedding-3"
                     self.embedding_dim = 2048
                 elif "embedding-2" in self.model_name:
+                    self.api_model_name = "embedding-2"
                     self.embedding_dim = 1024
                 else:
-                    self.embedding_dim = 1024  # 默认维度
+                    self.api_model_name = "embedding-3"  # 默认使用embedding-3
+                    self.embedding_dim = 2048
                 
             else:
                 raise ValueError(f"不支持的模型类型: {self.model_type}")
@@ -119,7 +129,7 @@ class EmbeddingGenerator:
             elif self.model_type == "zhipuai":
                 client = zhipuai.ZhipuAI(api_key=self.settings.zhipuai_api_key)
                 response = client.embeddings.create(
-                    model=self.model_name,
+                    model=self.api_model_name,
                     input=text
                 )
                 embedding = np.array(response.data[0].embedding, dtype=np.float32)
@@ -176,7 +186,7 @@ class EmbeddingGenerator:
                     batch_texts = texts[i:i + min(batch_size, 25)]
                     
                     response = client.embeddings.create(
-                        model=self.model_name,
+                        model=self.api_model_name,
                         input=batch_texts
                     )
                     
@@ -226,6 +236,10 @@ class EmbeddingGenerator:
         
         logger.info("嵌入生成完成")
         return chunks
+    
+    def get_embedding(self, text: str) -> np.ndarray:
+        """获取单个文本的嵌入向量"""
+        return self._generate_single_embedding(text)
     
     def get_embedding_dim(self) -> int:
         """获取嵌入维度"""

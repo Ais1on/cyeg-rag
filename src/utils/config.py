@@ -3,8 +3,13 @@
 """
 import os
 from typing import Optional
-from pydantic import BaseSettings
 from loguru import logger
+
+try:
+    from pydantic_settings import BaseSettings
+    from pydantic import Field
+except ImportError:
+    from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
@@ -28,14 +33,14 @@ class Settings(BaseSettings):
     milvus_password: str = ""
     
     # Neo4j配置
-    neo4j_uri: str = "bolt://localhost:7687"
-    neo4j_username: str = "neo4j"
-    neo4j_password: str = "password123"
+    neo4j_uri: str = Field(default="bolt://localhost:7687", env="NEO4J_URI")
+    neo4j_username: str = Field(default="neo4j", env="NEO4J_USERNAME") 
+    neo4j_password: str = Field(default="1234567890", env="NEO4J_PASSWORD")
     
     # 文档处理配置
     chunk_size: int = 512
     chunk_overlap: int = 50
-    embedding_model: str = "zhipuai-embedding-3"
+    embedding_model: str = "embedding-3"
     
     # LLM配置
     llm_model: str = "deepseek-chat"

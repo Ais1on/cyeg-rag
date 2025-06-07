@@ -185,159 +185,274 @@ def main():
         logger.warning("未配置ZhipuAI API密钥，将使用默认嵌入模型")
     
     try:
-        # 1. 创建示例文档
-        logger.info("1. 创建示例威胁情报文档")
+        # 0. 创建示例文档
+        logger.info("0. 创建示例威胁情报文档")
         docs_dir = create_sample_threat_docs()
         
-        # 2. 初始化RAG引擎
-        logger.info("2. 初始化威胁情报RAG引擎")
+        # 1. 初始化RAG引擎
+        logger.info("1. 初始化威胁情报RAG引擎")
         with ThreatIntelRAGEngine(auto_init=True) as rag_engine:
             
-            # 3. 摄取文档并构建知识图谱
-            logger.info("3. 摄取文档并构建知识图谱")
-            ingest_result = rag_engine.ingest_documents(
+            print(f"\n{'='*60}")
+            print("🚀 阶段一：文档Embedding和向量存储")
+            print(f"{'='*60}")
+            
+            # 2. 文档embedding和向量存储
+            logger.info("2. 开始文档embedding和向量存储")
+            embedding_result = rag_engine.embed_and_store_documents(
                 source=docs_dir,
                 source_type="directory",
-                build_knowledge_graph=True,
+                return_chunks=True,
                 return_stats=True
             )
             
-            print(f"\n📊 文档摄取统计:")
-            print(f"- 处理文档数: {ingest_result.get('stats', {}).get('processed_files', 0)}")
-            print(f"- 生成分块数: {ingest_result.get('stats', {}).get('total_chunks', 0)}")
-            print(f"- 向量存储: {ingest_result.get('stats', {}).get('stored_vectors', 0)}")
-            if 'graph_stats' in ingest_result:
-                graph_stats = ingest_result['graph_stats']
-                print(f"- 创建节点数: {graph_stats.get('created_nodes', 0)}")
-                print(f"- 创建关系数: {graph_stats.get('created_relationships', 0)}")
+            if embedding_result['status'] == 'success':
+                stats = embedding_result['stats']
+                print(f"✅ 向量存储阶段完成:")
+                print(f"   📂 处理文档数: {stats['total_documents']}")
+                print(f"   📄 生成分块数: {stats['total_chunks']}")
+                print(f"   🎯 成功embedding: {stats['successful_embeddings']}")
+                print(f"   ❌ 失败分块数: {stats['failed_chunks']}")
+                print(f"   📐 向量维度: {stats['vector_dimension']}")
+                
+                # 测试向量检索功能
+                print(f"\n📊 测试向量检索功能:")
+                vector_query = "APT29的攻击技术"
+                vector_results = rag_engine.query(
+                    question=vector_query,
+                    retrieval_method="vector",
+                    response_type="brief",
+                    top_k=3
+                )
+                print(f"   查询: {vector_query}")
+                print(f"   检索到 {vector_results['retrieval_stats']['total_retrieved']} 个相关片段")
+                print(f"   回答: {vector_results['response'][:150]}...")
+            else:
+                logger.error(f"向量存储失败: {embedding_result.get('error', '未知错误')}")
+                return
             
-            # 等待一下让数据完全索引
-            time.sleep(2)
+            print(f"\n{'='*60}")
+            print("🔗 阶段二：实体提取和知识图谱构建")
+            print(f"{'='*60}")
             
-            # 4. 基础RAG查询测试
-            logger.info("4. 测试基础RAG查询")
+            # 3. 使用已存储的分块数据构建知识图谱
+            logger.info("3. 开始实体提取和知识图谱构建")
+            
+            # 从embedding结果获取分块数据
+            chunks = embedding_result.get('chunks', [])
+            
+            graph_result = rag_engine.build_knowledge_graph_from_documents(
+                chunks=chunks,
+                extract_entities=True,
+                return_stats=True
+            )
+            
+            if graph_result['status'] == 'success':
+                graph_stats = graph_result['graph_stats']
+                print(f"✅ 知识图谱构建完成:")
+                print(f"   🏷️  创建节点数: {graph_stats.get('created_nodes', 0)}")
+                print(f"   🔗 创建关系数: {graph_stats.get('created_relationships', 0)}")
+                print(f"   🎯 提取实体数: {graph_stats.get('extracted_entities', 0)}")
+                print(f"   📊 处理分块数: {graph_result['total_chunks_processed']}")
+                
+                # 测试知识图谱查询
+                print(f"\n🕸️ 测试知识图谱查询:")
+                graph_query = "APT29与哪些恶意软件相关？"
+                graph_results = rag_engine.query(
+                    question=graph_query,
+                    retrieval_method="graph",
+                    response_type="brief",
+                    top_k=3
+                )
+                print(f"   查询: {graph_query}")
+                print(f"   检索到 {graph_results['retrieval_stats']['total_retrieved']} 个相关片段")
+                print(f"   回答: {graph_results['response'][:150]}...")
+            else:
+                logger.warning(f"知识图谱构建失败: {graph_result.get('error', '未知错误')}")
+            
+            print(f"\n{'='*60}")
+            print("🔀 阶段三：混合检索和高级功能演示")
+            print(f"{'='*60}")
+            
+            # 等待数据完全索引
+            time.sleep(1)
+            
+            # 4. 混合检索对比测试
+            logger.info("4. 测试混合检索功能")
             
             test_queries = [
-                "APT29使用了哪些攻击技术？",
-                "DarkSide勒索软件有什么特征？",
-                "CVE-2021-34527漏洞的影响是什么？",
-                "192.168.100.5这个IP地址有什么威胁信息？"
+                "APT29使用了哪些MITRE ATT&CK技术？",
+                "DarkSide勒索软件的IoC指标有哪些？",
+                "CVE-2021-34527漏洞被哪些威胁组织利用？",
+                "192.168.100.5这个IP地址的威胁信息"
             ]
             
-            for query in test_queries:
-                print(f"\n🔍 查询: {query}")
+            print(f"\n🔍 混合检索对比测试:")
+            for i, query in enumerate(test_queries, 1):
+                print(f"\n📋 测试 {i}: {query}")
                 
-                # 混合检索查询
-                result = rag_engine.query(
-                    question=query,
-                    retrieval_method="hybrid",
-                    response_type="comprehensive",
-                    top_k=5
-                )
+                # 测试不同检索方法
+                methods = ["vector", "graph", "hybrid"]
+                method_results = {}
                 
-                print(f"💬 回答: {result['response'][:300]}...")
-                print(f"📈 置信度: {result['metadata']['confidence_score']}")
-                print(f"📚 使用来源: {result['metadata']['sources_used']}")
-                print("-" * 50)
+                for method in methods:
+                    try:
+                        result = rag_engine.query(
+                            question=query,
+                            retrieval_method=method,
+                            response_type="brief",
+                            top_k=5
+                        )
+                        
+                        method_results[method] = {
+                            'retrieved_count': result['retrieval_stats']['total_retrieved'],
+                            'confidence': result['metadata'].get('confidence_score', 0),
+                            'response_length': len(result['response'])
+                        }
+                        
+                        print(f"   {method.upper():>6}: 检索{result['retrieval_stats']['total_retrieved']}个 | "
+                              f"置信度{result['metadata'].get('confidence_score', 0):.2f} | "
+                              f"回答长度{len(result['response'])}")
+                        
+                    except Exception as e:
+                        logger.warning(f"   {method.upper():>6}: 查询失败 - {str(e)}")
+                
+                # 展示混合检索的完整回答
+                if 'hybrid' in method_results:
+                    hybrid_result = rag_engine.query(
+                        question=query,
+                        retrieval_method="hybrid",
+                        response_type="comprehensive",
+                        top_k=8
+                    )
+                    print(f"   💬 混合检索回答: {hybrid_result['response'][:200]}...")
             
-            # 5. 威胁分析功能测试
-            logger.info("5. 测试威胁分析功能")
+            # 5. 高级分析功能演示
+            logger.info("5. 演示高级分析功能")
             
+            print(f"\n⚡ 高级威胁分析功能:")
+            
+            # 威胁分析
+            print(f"\n🎯 威胁分析:")
             threat_analysis = rag_engine.analyze_threat(
-                query="分析APT29的最新攻击活动和使用的技术",
+                query="分析APT29的攻击手法和使用的工具",
                 include_graph_analysis=True
             )
             
-            print(f"\n🎯 威胁分析报告:")
-            print(f"风险等级: {threat_analysis.get('risk_level', '未知')}")
-            print(f"威胁指标数量: {len(threat_analysis.get('threat_indicators', {}).get('iocs', []))}")
-            print(f"防护建议: {len(threat_analysis.get('recommendations', []))}")
+            if 'error' not in threat_analysis:
+                print(f"   风险等级: {threat_analysis.get('risk_level', '中等')}")
+                print(f"   威胁指标: {len(threat_analysis.get('threat_indicators', {}).get('iocs', []))}个")
+                print(f"   防护建议: {len(threat_analysis.get('recommendations', []))}条")
+                print(f"   分析摘要: {threat_analysis.get('analysis_summary', '无')[:100]}...")
             
-            # 6. IoC分析功能测试
-            logger.info("6. 测试IoC分析功能")
-            
+            # IoC分析
+            print(f"\n🔍 IoC分析:")
             ioc_analysis = rag_engine.analyze_ioc(
                 ioc_value="192.168.100.5",
                 ioc_type="ip"
             )
             
-            print(f"\n🔍 IoC分析结果:")
-            print(f"威胁等级: {ioc_analysis.get('threat_level', '未知')}")
-            print(f"关联恶意软件: {ioc_analysis.get('associated_malware', [])}")
-            print(f"关联APT组织: {ioc_analysis.get('apt_groups', [])}")
+            if 'error' not in ioc_analysis:
+                print(f"   威胁等级: {ioc_analysis.get('threat_level', '未知')}")
+                print(f"   关联恶意软件: {ioc_analysis.get('associated_malware', [])}")
+                print(f"   关联威胁组织: {ioc_analysis.get('apt_groups', [])}")
             
-            # 7. 相似威胁搜索
-            logger.info("7. 测试相似威胁搜索")
-            
+            # 相似威胁搜索
+            print(f"\n🔗 相似威胁搜索:")
             similar_threats = rag_engine.search_similar_threats(
-                reference_threat="勒索软件攻击使用鱼叉式钓鱼邮件",
+                reference_threat="勒索软件使用鱼叉式钓鱼邮件进行初始访问",
                 similarity_threshold=0.3,
                 max_results=5
             )
-            
-            print(f"\n🔗 找到 {len(similar_threats)} 个相似威胁")
+            print(f"   找到 {len(similar_threats)} 个相似威胁")
             for i, threat in enumerate(similar_threats[:3], 1):
-                print(f"{i}. 相似度: {threat['retrieval_score']:.2f}")
-                print(f"   内容: {threat['content'][:100]}...")
+                print(f"   {i}. 相似度{threat['retrieval_score']:.2f}: {threat['content'][:80]}...")
             
-            # 8. 威胁态势分析
-            logger.info("8. 测试威胁态势分析")
-            
-            landscape = rag_engine.get_threat_landscape()
-            
-            print(f"\n🌍 威胁态势概览:")
-            stats = landscape.get('statistics', {})
-            print(f"- IoC数量: {stats.get('ioc_count', 0)}")
-            print(f"- 恶意软件数量: {stats.get('malware_count', 0)}")
-            print(f"- APT组织数量: {stats.get('apt_count', 0)}")
-            print(f"- 漏洞数量: {stats.get('vuln_count', 0)}")
-            
-            # 9. 自然语言图谱查询
-            logger.info("9. 测试自然语言图谱查询")
+            # 6. 自然语言图谱查询
+            print(f"\n🗣️ 自然语言图谱查询:")
             
             nl_queries = [
-                "有哪些APT组织使用了鱼叉式钓鱼攻击？",
-                "DarkSide勒索软件与哪些IoC相关？",
-                "CVE-2021-34527被哪些威胁组织利用？"
+                "有哪些APT组织使用了T1566.001技术？",
+                "DarkSide勒索软件关联的所有IoC",
+                "CVE-2021-34527漏洞的利用者"
             ]
             
             for nl_query in nl_queries:
-                print(f"\n❓ 图谱查询: {nl_query}")
-                nl_result = rag_engine.natural_language_query(nl_query)
-                print(f"📋 结果: {nl_result[:200]}...")
+                try:
+                    nl_result = rag_engine.natural_language_query(nl_query)
+                    print(f"   ❓ {nl_query}")
+                    print(f"   💬 {nl_result[:120]}...")
+                except Exception as e:
+                    print(f"   ❓ {nl_query}")
+                    print(f"   ❌ 查询失败: {str(e)}")
             
-            # 10. 系统状态检查
-            logger.info("10. 检查系统状态")
+            # 7. 威胁态势概览
+            print(f"\n🌍 威胁态势概览:")
             
-            status = rag_engine.get_system_status()
-            
-            print(f"\n⚙️ 系统状态:")
-            print(f"向量存储: {status.get('vector_store', {}).get('collection_name', '未知')}")
-            print(f"嵌入模型: {status.get('embedder', {}).get('model', '未知')}")
-            print(f"LLM模型: {status.get('llm', {}).get('model', '未知')}")
-            
-            # 11. 演示不同检索方法的对比
-            logger.info("11. 对比不同检索方法")
-            
-            comparison_query = "APT29的攻击特征和使用的恶意软件"
-            
-            methods = ["vector", "graph", "hybrid"]
-            for method in methods:
-                result = rag_engine.query(
-                    question=comparison_query,
-                    retrieval_method=method,
-                    response_type="brief",
-                    top_k=3
-                )
+            try:
+                landscape = rag_engine.get_threat_landscape()
+                stats = landscape.get('statistics', {})
                 
-                print(f"\n🔄 {method.upper()}检索:")
-                print(f"置信度: {result['metadata']['confidence_score']}")
-                print(f"回答: {result['response'][:150]}...")
+                print(f"   📊 总体统计:")
+                print(f"     - IoC指标: {stats.get('ioc_count', 0)}个")
+                print(f"     - 恶意软件: {stats.get('malware_count', 0)}个")
+                print(f"     - APT组织: {stats.get('apt_count', 0)}个")
+                print(f"     - 漏洞: {stats.get('vuln_count', 0)}个")
+                
+                top_threats = landscape.get('top_threats', [])
+                if top_threats:
+                    print(f"   🔥 主要威胁:")
+                    for i, threat in enumerate(top_threats[:3], 1):
+                        print(f"     {i}. {threat.get('name', '未知威胁')}")
+                        
+            except Exception as e:
+                print(f"   ❌ 威胁态势分析失败: {str(e)}")
             
-            logger.info("✅ 所有测试完成！")
+            # 8. 系统状态和性能统计
+            print(f"\n⚙️ 系统状态检查:")
+            
+            try:
+                status = rag_engine.get_system_status()
+                
+                print(f"   🎯 向量存储:")
+                vector_stats = status.get('vector_store', {})
+                print(f"     - 集合名: {vector_stats.get('collection_name', '未知')}")
+                print(f"     - 向量数量: {vector_stats.get('entity_num', 0)}")
+                
+                print(f"   🕸️ 知识图谱:")
+                graph_stats = status.get('knowledge_graph', {})
+                print(f"     - 节点数: {graph_stats.get('total_nodes', 0)}")
+                print(f"     - 关系数: {graph_stats.get('total_relationships', 0)}")
+                
+                print(f"   🤖 模型配置:")
+                print(f"     - 嵌入模型: {status.get('embedder', {}).get('model', '未知')}")
+                print(f"     - LLM模型: {status.get('llm', {}).get('model', '未知')}")
+                
+            except Exception as e:
+                print(f"   ❌ 系统状态检查失败: {str(e)}")
+            
+            # 9. 性能对比总结
+            print(f"\n📈 处理性能总结:")
+            print(f"   ✅ 文档处理: {stats['total_documents']}个文档 → {stats['total_chunks']}个分块")
+            print(f"   ✅ 向量存储: {stats['successful_embeddings']}个向量 (维度:{stats['vector_dimension']})")
+            if graph_result['status'] == 'success':
+                print(f"   ✅ 知识图谱: {graph_stats.get('created_nodes', 0)}个节点, {graph_stats.get('created_relationships', 0)}个关系")
+            print(f"   ✅ 系统就绪: 支持向量检索、图谱查询、混合检索")
+            
+            logger.info("✅ 威胁情报RAG系统演示完成！")
+            
+            # 10. 交互式查询提示
+            print(f"\n💡 系统已就绪，您可以使用以下方式进行查询:")
+            print(f"   - 向量检索: rag_engine.query(question, retrieval_method='vector')")
+            print(f"   - 图谱查询: rag_engine.query(question, retrieval_method='graph')")
+            print(f"   - 混合检索: rag_engine.query(question, retrieval_method='hybrid')")
+            print(f"   - 威胁分析: rag_engine.analyze_threat(query)")
+            print(f"   - IoC分析: rag_engine.analyze_ioc(ioc_value)")
             
     except Exception as e:
         logger.error(f"示例运行失败: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise
 
 

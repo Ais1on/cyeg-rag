@@ -4,6 +4,5 @@
 
 from .loader import DocumentLoader
 from .chunker import DocumentChunker
-from .processor import ThreatIntelProcessor
 
-__all__ = ["DocumentLoader", "DocumentChunker", "ThreatIntelProcessor"] 
+__all__ = ["DocumentLoader", "DocumentChunker"] 

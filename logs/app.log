@@ -1,0 +1,19 @@
+2025-06-07 16:35:42 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-07 16:35:42 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭
+2025-06-07 16:35:47 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-07 16:35:47 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-07 16:36:07 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-07 16:37:55 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-07 16:37:55 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭
+2025-06-07 16:37:59 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-07 16:37:59 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-07 16:38:16 | INFO | src.llm.deepseek_client:extract_threat_entities_advanced:206 | 成功解析实体: 5 个类型
+2025-06-07 16:38:17 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-07 16:38:17 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-07 16:38:17 | INFO | src.knowledge_graph.graph_builder:build_graph_from_documents:104 | 开始构建知识图谱，处理 1 个文档分块
+2025-06-07 16:38:28 | INFO | src.llm.deepseek_client:extract_threat_entities_advanced:206 | 成功解析实体: 5 个类型
+2025-06-07 16:38:28 | ERROR | src.knowledge_graph.neo4j_client:run_query:73 | 执行Neo4j查询失败: {code: Neo.ClientError.Schema.ConstraintValidationFailed} {message: Node(8) already exists with label `Malware` and property `name` = 'CozyDuke'}
+2025-06-07 16:38:28 | ERROR | src.knowledge_graph.neo4j_client:run_query:74 | 查询语句: MERGE (n:Malware {name: $name, family: $family, type: $type, description: $description, capabilities: $capabilities, platforms: $platforms}) RETURN n
+2025-06-07 16:38:28 | ERROR | src.knowledge_graph.neo4j_client:create_node:107 | 创建节点失败: {code: Neo.ClientError.Schema.ConstraintValidationFailed} {message: Node(8) already exists with label `Malware` and property `name` = 'CozyDuke'}
+2025-06-07 16:38:28 | ERROR | src.knowledge_graph.graph_builder:_create_malware_node:257 | 创建恶意软件节点失败: {code: Neo.ClientError.Schema.ConstraintValidationFailed} {message: Node(8) already exists with label `Malware` and property `name` = 'CozyDuke'}
+2025-06-07 16:38:30 | INFO | src.knowledge_graph.graph_builder:build_graph_from_documents:144 | 知识图谱构建完成: {'total_chunks': 1, 'processed_chunks': 1, 'created_nodes': 3, 'created_relationships': 3, 'errors': []}

@@ -128,7 +128,7 @@ def start_services():
         
         logger.info("✅ 服务启动成功")
         logger.info("- Milvus: http://localhost:19530")
-        logger.info("- Neo4j: http://localhost:7474 (neo4j/password123)")
+        logger.info("- Neo4j: http://localhost:7474 (neo4j/password)")
         
     except subprocess.CalledProcessError as e:
         logger.error(f"服务启动失败: {e}")

@@ -18,9 +18,10 @@ beautifulsoup4==4.12.2
 requests==2.31.0
 
 # Text processing
-sentence-transformers==2.2.2
+sentence-transformers==2.7.0
 transformers==4.36.2
 torch==2.1.2
+huggingface-hub<0.24.0
 
 # Data processing
 pandas==2.1.4
@@ -29,6 +30,7 @@ numpy==1.24.3
 # Utilities
 tqdm==4.66.1
 pydantic==2.5.2
+pydantic-settings==2.1.0
 loguru==0.7.2
 
 # LLM APIs

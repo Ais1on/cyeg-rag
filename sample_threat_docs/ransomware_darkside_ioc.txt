@@ -1,0 +1,32 @@
+
+DarkSide勒索软件IoC报告
+
+威胁名称：DarkSide勒索软件
+威胁类型：勒索软件
+严重程度：高
+
+技术特征：
+- 使用AES-256和RSA-1024加密算法
+- 针对Windows和Linux系统
+- 利用CVE-2021-34527(PrintNightmare)漏洞进行权限提升
+
+IoC指标：
+- 文件哈希: 
+  - SHA256: 7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c
+  - MD5: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
+- 注册表键: HKLM\SOFTWARE\DarkSideKey
+- 文件路径: C:\ProgramData\darkside.exe
+- 网络通信: 185.220.101.45:8080
+
+关联组织：DarkSide犯罪集团
+
+影响范围：
+- 能源行业
+- 制造业
+- 金融服务
+
+防护建议：
+1. 及时安装安全补丁
+2. 实施网络分段
+3. 备份关键数据
+4. 部署端点检测和响应(EDR)解决方案
