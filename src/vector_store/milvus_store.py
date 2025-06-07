@@ -449,3 +449,79 @@ class MilvusVectorStore:
         except Exception as e:
             logger.error(f"备份集合失败: {str(e)}")
             raise 
+    
+    def insert_vectors(self, vectors: List[Dict[str, Any]]) -> List[str]:
+        """
+        插入向量数据（字典格式）
+        
+        Args:
+            vectors: 向量数据列表，每个元素包含：
+                - id: 向量ID
+                - embedding: 嵌入向量 (numpy array)
+                - metadata: 元数据字典
+                
+        Returns:
+            插入的ID列表
+        """
+        if not vectors:
+            return []
+        
+        try:
+            # 准备数据
+            ids = []
+            embeddings = []
+            contents = []
+            metadatas = []
+            sources = []
+            chunk_indices = []
+            embedding_models = []
+            
+            for vector_data in vectors:
+                if 'embedding' not in vector_data or vector_data['embedding'] is None:
+                    logger.warning(f"向量数据 {vector_data.get('id', 'unknown')} 没有嵌入向量，跳过")
+                    continue
+                
+                vector_id = vector_data.get('id', f"vector_{len(ids)}")
+                embedding = vector_data['embedding']
+                metadata = vector_data.get('metadata', {})
+                
+                # 确保embedding是列表格式
+                if hasattr(embedding, 'tolist'):
+                    embedding = embedding.tolist()
+                elif isinstance(embedding, np.ndarray):
+                    embedding = embedding.tolist()
+                
+                ids.append(vector_id)
+                embeddings.append(embedding)
+                contents.append(metadata.get('content', '')[:65535])  # 截断过长内容
+                metadatas.append(metadata)
+                sources.append(metadata.get('source', '')[:500])
+                chunk_indices.append(metadata.get('chunk_index', 0))
+                embedding_models.append(metadata.get('embedding_model', '')[:100])
+            
+            if not ids:
+                logger.warning("没有有效的向量可插入")
+                return []
+            
+            # 插入数据
+            data = [
+                ids,
+                embeddings,
+                contents,
+                metadatas,
+                sources,
+                chunk_indices,
+                embedding_models
+            ]
+            
+            insert_result = self.collection.insert(data)
+            
+            # 刷新以确保数据可见
+            self.collection.flush()
+            
+            logger.info(f"成功插入 {len(ids)} 个向量")
+            return ids
+            
+        except Exception as e:
+            logger.error(f"插入向量失败: {str(e)}")
+            raise 

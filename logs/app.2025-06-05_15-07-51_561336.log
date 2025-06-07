@@ -1,0 +1,296 @@
+2025-06-05 15:30:06 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 15:30:06 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 15:30:06 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 15:30:06 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 15:30:06 | INFO | src.vector_store.embedder:_load_model:54 | 加载Sentence Transformer模型: embedding-3
+2025-06-05 15:30:07 | ERROR | src.vector_store.embedder:_load_model:81 | 模型加载失败: sentence-transformers/embedding-3 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `huggingface-cli login` or by passing `token=<your_token>`
+2025-06-05 15:30:07 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: sentence-transformers/embedding-3 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `huggingface-cli login` or by passing `token=<your_token>`
+2025-06-05 15:30:07 | ERROR | __main__:main:453 | 示例运行失败: sentence-transformers/embedding-3 is not a local folder and is not a valid model identifier listed on 'https://huggingface.co/models'
+If this is a private repository, make sure to pass a token having permission to this repo either by logging in with `huggingface-cli login` or by passing `token=<your_token>`
+2025-06-05 15:33:05 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 15:33:05 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 15:33:05 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 15:33:05 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 15:33:05 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 15:33:05 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 15:33:05 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 15:33:05 | INFO | src.vector_store.milvus_store:_create_collection:127 | 成功创建集合: threat_intel_rag
+2025-06-05 15:33:06 | INFO | src.vector_store.milvus_store:_create_index:150 | 成功创建向量索引: IVF_FLAT
+2025-06-05 15:33:10 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: Couldn't connect to localhost:7687 (resolved to ('127.0.0.1:7687', '[::1]:7687')):
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+2025-06-05 15:33:10 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: Couldn't connect to localhost:7687 (resolved to ('127.0.0.1:7687', '[::1]:7687')):
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+2025-06-05 15:33:10 | ERROR | __main__:main:453 | 示例运行失败: Couldn't connect to localhost:7687 (resolved to ('127.0.0.1:7687', '[::1]:7687')):
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+2025-06-05 15:47:36 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 15:47:36 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 15:47:36 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 15:47:36 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 15:47:36 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 15:47:36 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 15:47:36 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 15:47:36 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 15:47:36 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:47:36 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:47:36 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:50:21 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 15:50:21 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 15:50:21 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 15:50:21 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 15:50:21 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 15:50:21 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 15:50:21 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 15:50:21 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 15:50:21 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:50:21 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:50:21 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:52:13 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 15:52:13 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 15:52:13 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 15:52:13 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 15:52:13 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 15:52:13 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 15:52:13 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 15:52:13 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 15:52:13 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:52:13 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:52:13 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:53:18 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 15:53:18 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 15:53:18 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 15:53:18 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 15:53:18 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 15:53:18 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 15:53:18 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 15:53:18 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 15:53:18 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:53:18 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 15:53:18 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:01:23 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 16:01:23 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 16:01:23 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 16:01:23 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 16:01:23 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 16:01:23 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 16:01:23 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 16:01:23 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 16:01:23 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:01:23 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:01:23 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:26:19 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 16:26:19 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 16:26:19 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 16:26:19 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 16:26:19 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 16:26:19 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 16:26:19 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 16:26:19 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 16:26:19 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:26:19 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:26:19 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:27:22 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 16:27:22 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 16:27:22 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 16:27:22 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 16:27:22 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 16:27:22 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 16:27:22 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 16:27:22 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 16:27:22 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:27:22 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:27:22 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:30:33 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:31:00 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:32:15 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 16:32:15 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 16:32:15 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 16:32:15 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 16:32:15 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 16:32:15 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 16:32:15 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 16:32:15 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 16:32:15 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:32:15 | ERROR | src.rag_engine.rag_engine:_init_components:95 | 初始化RAG组件失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:32:15 | ERROR | __main__:main:453 | 示例运行失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:34:58 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:36:11 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:39:23 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: Couldn't connect to localhost:7687 (resolved to ('127.0.0.1:7687', '[::1]:7687')):
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+2025-06-05 16:40:10 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: Couldn't connect to localhost:7687 (resolved to ('127.0.0.1:7687', '[::1]:7687')):
+Failed to establish connection to ResolvedIPv4Address(('127.0.0.1', 7687)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+Failed to establish connection to ResolvedIPv6Address(('::1', 7687, 0, 0)) (reason [WinError 10061] 由于目标计算机积极拒绝，无法连接。)
+2025-06-05 16:47:31 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:54:46 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:55:33 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:56:52 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 16:57:22 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 17:36:50 | ERROR | src.knowledge_graph.neo4j_client:_connect:46 | 连接Neo4j失败: {code: Neo.ClientError.Security.Unauthorized} {message: The client is unauthorized due to authentication failure.}
+2025-06-05 17:43:23 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:45:06 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:45:06 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭
+2025-06-05 17:45:20 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 17:45:20 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 17:45:20 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 17:45:20 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 17:45:20 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 17:45:20 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 17:45:20 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 17:45:20 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 17:45:20 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:45:20 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:45:21 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-05 17:45:21 | INFO | src.rag_engine.rag_engine:_init_components:92 | 所有RAG组件初始化成功
+2025-06-05 17:45:21 | INFO | src.rag_engine.rag_engine:__init__:47 | 威胁情报RAG引擎初始化完成
+2025-06-05 17:45:21 | INFO | __main__:main:201 | 2. 开始文档embedding和向量存储
+2025-06-05 17:45:21 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:182 | 开始处理文档embedding和向量存储: e:\langchain project\cyeg-rag\sample_threat_docs
+2025-06-05 17:45:21 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:185 | 正在加载文档...
+2025-06-05 17:45:21 | ERROR | src.rag_engine.rag_engine:embed_and_store_documents:250 | 文档embedding和向量存储失败: 'DocumentLoader' object has no attribute 'load_documents'
+2025-06-05 17:45:21 | ERROR | __main__:main:231 | 向量存储失败: 'DocumentLoader' object has no attribute 'load_documents'
+2025-06-05 17:45:21 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭
+2025-06-05 17:51:24 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 17:51:24 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 17:51:24 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 17:51:24 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 17:51:24 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 17:51:24 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 17:51:24 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 17:51:24 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 17:51:24 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:51:24 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:51:24 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:_init_components:92 | 所有RAG组件初始化成功
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:__init__:47 | 威胁情报RAG引擎初始化完成
+2025-06-05 17:51:24 | INFO | __main__:main:201 | 2. 开始文档embedding和向量存储
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:189 | 开始处理文档embedding和向量存储: e:\langchain project\cyeg-rag\sample_threat_docs
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:192 | 正在加载文档...
+2025-06-05 17:51:24 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\apt29_lazarus_analysis.txt
+2025-06-05 17:51:24 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\cve_vulnerabilities.txt
+2025-06-05 17:51:24 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\mitre_attack_techniques.txt
+2025-06-05 17:51:24 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\ransomware_darkside_ioc.txt
+2025-06-05 17:51:24 | INFO | src.document_processor.loader:load_directory:79 | 从目录 e:\langchain project\cyeg-rag\sample_threat_docs 加载了 4 个文档
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:201 | 成功加载 4 个文档
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:204 | 正在进行文档分块...
+2025-06-05 17:51:24 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:51:24 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:51:24 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:51:24 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:51:24 | INFO | src.document_processor.chunker:chunk_documents:91 | 总共生成 6 个文档分块
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:206 | 生成 6 个文档分块
+2025-06-05 17:51:24 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:209 | 正在生成embedding...
+2025-06-05 17:51:26 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:240 | 正在存储 6 个向量到数据库...
+2025-06-05 17:51:26 | ERROR | src.rag_engine.rag_engine:embed_and_store_documents:264 | 文档embedding和向量存储失败: 'MilvusVectorStore' object has no attribute 'insert_vectors'
+2025-06-05 17:51:26 | ERROR | __main__:main:231 | 向量存储失败: 'MilvusVectorStore' object has no attribute 'insert_vectors'
+2025-06-05 17:51:26 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭
+2025-06-05 17:53:41 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 17:53:41 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 17:53:41 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 17:53:41 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 17:53:41 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 17:53:41 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 17:53:41 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 17:53:41 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 17:53:41 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:53:41 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:53:41 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:_init_components:92 | 所有RAG组件初始化成功
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:__init__:47 | 威胁情报RAG引擎初始化完成
+2025-06-05 17:53:41 | INFO | __main__:main:201 | 2. 开始文档embedding和向量存储
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:189 | 开始处理文档embedding和向量存储: e:\langchain project\cyeg-rag\sample_threat_docs
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:192 | 正在加载文档...
+2025-06-05 17:53:41 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\apt29_lazarus_analysis.txt
+2025-06-05 17:53:41 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\cve_vulnerabilities.txt
+2025-06-05 17:53:41 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\mitre_attack_techniques.txt
+2025-06-05 17:53:41 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\ransomware_darkside_ioc.txt
+2025-06-05 17:53:41 | INFO | src.document_processor.loader:load_directory:79 | 从目录 e:\langchain project\cyeg-rag\sample_threat_docs 加载了 4 个文档
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:201 | 成功加载 4 个文档
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:204 | 正在进行文档分块...
+2025-06-05 17:53:41 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:53:41 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:53:41 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:53:41 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:53:41 | INFO | src.document_processor.chunker:chunk_documents:91 | 总共生成 6 个文档分块
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:206 | 生成 6 个文档分块
+2025-06-05 17:53:41 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:209 | 正在生成embedding...
+2025-06-05 17:53:42 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:240 | 正在存储 6 个向量到数据库...
+2025-06-05 17:53:42 | ERROR | src.vector_store.milvus_store:insert_chunks:218 | 插入向量失败: 'dict' object has no attribute 'embedding'
+2025-06-05 17:53:42 | ERROR | src.rag_engine.rag_engine:embed_and_store_documents:264 | 文档embedding和向量存储失败: 'dict' object has no attribute 'embedding'
+2025-06-05 17:53:42 | ERROR | __main__:main:231 | 向量存储失败: 'dict' object has no attribute 'embedding'
+2025-06-05 17:53:42 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭
+2025-06-05 17:58:16 | INFO | __main__:main:178 | === 威胁情报RAG系统完整示例 ===
+2025-06-05 17:58:16 | INFO | __main__:main:189 | 0. 创建示例威胁情报文档
+2025-06-05 17:58:16 | INFO | __main__:create_sample_threat_docs:172 | 已创建 4 个示例威胁情报文档
+2025-06-05 17:58:16 | INFO | __main__:main:193 | 1. 初始化威胁情报RAG引擎
+2025-06-05 17:58:16 | INFO | src.vector_store.embedder:_load_model:65 | 配置ZhipuAI嵌入模型: embedding-3
+2025-06-05 17:58:16 | INFO | src.vector_store.embedder:_load_model:88 | 模型加载成功，嵌入维度: 2048
+2025-06-05 17:58:16 | INFO | src.vector_store.milvus_store:_connect:62 | 成功连接到Milvus: localhost:19530
+2025-06-05 17:58:16 | INFO | src.vector_store.milvus_store:_create_collection:73 | 集合 threat_intel_rag 已存在，直接加载
+2025-06-05 17:58:16 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:58:16 | INFO | src.knowledge_graph.neo4j_client:_connect:43 | 成功连接到Neo4j: bolt://localhost:7687
+2025-06-05 17:58:16 | INFO | src.knowledge_graph.graph_builder:_create_constraints:76 | 数据库约束创建完成
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:_init_components:92 | 所有RAG组件初始化成功
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:__init__:47 | 威胁情报RAG引擎初始化完成
+2025-06-05 17:58:16 | INFO | __main__:main:201 | 2. 开始文档embedding和向量存储
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:189 | 开始处理文档embedding和向量存储: e:\langchain project\cyeg-rag\sample_threat_docs
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:192 | 正在加载文档...
+2025-06-05 17:58:16 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\apt29_lazarus_analysis.txt
+2025-06-05 17:58:16 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\cve_vulnerabilities.txt
+2025-06-05 17:58:16 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\mitre_attack_techniques.txt
+2025-06-05 17:58:16 | INFO | src.document_processor.loader:load_file:44 | 加载文件: e:\langchain project\cyeg-rag\sample_threat_docs\ransomware_darkside_ioc.txt
+2025-06-05 17:58:16 | INFO | src.document_processor.loader:load_directory:79 | 从目录 e:\langchain project\cyeg-rag\sample_threat_docs 加载了 4 个文档
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:201 | 成功加载 4 个文档
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:204 | 正在进行文档分块...
+2025-06-05 17:58:16 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:58:16 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:58:16 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:58:16 | INFO | src.document_processor.chunker:chunk_document:57 | 开始分块文档，策略: fixed_size
+2025-06-05 17:58:16 | INFO | src.document_processor.chunker:chunk_documents:91 | 总共生成 6 个文档分块
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:206 | 生成 6 个文档分块
+2025-06-05 17:58:16 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:209 | 正在生成embedding...
+2025-06-05 17:58:18 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:240 | 正在存储 6 个向量到数据库...
+2025-06-05 17:58:21 | INFO | src.vector_store.milvus_store:insert_vectors:522 | 成功插入 6 个向量
+2025-06-05 17:58:21 | INFO | src.rag_engine.rag_engine:embed_and_store_documents:259 | 文档embedding和向量存储完成: 成功 6/6 个分块
+2025-06-05 17:58:21 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: APT29的攻击技术
+2025-06-05 17:58:23 | INFO | src.vector_store.milvus_store:search:273 | 搜索完成，返回 3 个结果
+2025-06-05 17:58:23 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 3 个相关上下文
+2025-06-05 17:58:43 | INFO | __main__:main:239 | 3. 开始实体提取和知识图谱构建
+2025-06-05 17:58:43 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:289 | 开始构建知识图谱...
+2025-06-05 17:58:43 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:308 | 使用提供的 6 个文档分块
+2025-06-05 17:58:43 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:311 | 正在进行实体提取和关系构建...
+2025-06-05 17:58:43 | INFO | src.knowledge_graph.graph_builder:build_graph_from_documents:104 | 开始构建知识图谱，处理 6 个文档分块
+2025-06-05 17:59:16 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-05 17:59:46 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-05 17:59:55 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-05 18:00:11 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-05 18:00:46 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-05 18:00:56 | ERROR | src.llm.deepseek_client:extract_threat_entities_advanced:175 | 高级威胁实体提取失败: Expecting value: line 1 column 1 (char 0)
+2025-06-05 18:00:56 | INFO | src.knowledge_graph.graph_builder:build_graph_from_documents:144 | 知识图谱构建完成: {'total_chunks': 6, 'processed_chunks': 6, 'created_nodes': 6, 'created_relationships': 0, 'errors': []}
+2025-06-05 18:00:56 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:324 | 知识图谱构建完成:
+2025-06-05 18:00:56 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:325 | - 创建节点: 6
+2025-06-05 18:00:56 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:326 | - 创建关系: 0
+2025-06-05 18:00:56 | INFO | src.rag_engine.rag_engine:build_knowledge_graph_from_documents:327 | - 提取实体: 0
+2025-06-05 18:00:56 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: APT29与哪些恶意软件相关？
+2025-06-05 18:00:56 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 0 个相关上下文
+2025-06-05 18:01:11 | INFO | __main__:main:281 | 4. 测试混合检索功能
+2025-06-05 18:01:11 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: APT29使用了哪些MITRE ATT&CK技术？
+2025-06-05 18:01:11 | INFO | src.vector_store.milvus_store:search:273 | 搜索完成，返回 5 个结果
+2025-06-05 18:01:11 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 5 个相关上下文
+2025-06-05 18:01:27 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: APT29使用了哪些MITRE ATT&CK技术？
+2025-06-05 18:01:27 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 0 个相关上下文
+2025-06-05 18:01:54 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: APT29使用了哪些MITRE ATT&CK技术？
+2025-06-05 18:01:55 | INFO | src.vector_store.milvus_store:search:273 | 搜索完成，返回 6 个结果
+2025-06-05 18:01:55 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 5 个相关上下文
+2025-06-05 18:02:11 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: APT29使用了哪些MITRE ATT&CK技术？
+2025-06-05 18:02:11 | INFO | src.vector_store.milvus_store:search:273 | 搜索完成，返回 6 个结果
+2025-06-05 18:02:11 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 6 个相关上下文
+2025-06-05 18:02:51 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: DarkSide勒索软件的IoC指标有哪些？
+2025-06-05 18:02:51 | INFO | src.vector_store.milvus_store:search:273 | 搜索完成，返回 5 个结果
+2025-06-05 18:02:51 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 5 个相关上下文
+2025-06-05 18:03:04 | INFO | src.rag_engine.rag_engine:query:468 | 执行RAG查询: DarkSide勒索软件的IoC指标有哪些？
+2025-06-05 18:03:04 | INFO | src.rag_engine.rag_engine:query:479 | 检索到 0 个相关上下文
+2025-06-05 18:03:24 | INFO | src.knowledge_graph.neo4j_client:close:53 | Neo4j连接已关闭

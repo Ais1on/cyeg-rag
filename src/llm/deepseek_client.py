@@ -2,7 +2,7 @@
 DeepSeek LLM客户端
 """
 import httpx
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from loguru import logger
 from .llm_client import LLMClient
 
@@ -125,55 +125,210 @@ class DeepSeekClient(LLMClient):
     ) -> Dict[str, List[Dict[str, Any]]]:
         """高级威胁实体提取"""
         prompt = f"""
-作为威胁情报分析专家，请从以下文本中提取威胁情报相关的实体，并为每个实体提供详细信息：
+作为威胁情报分析专家，请从以下文本中提取威胁情报相关的实体。
 
 文本：
 {text}
 
-请提取以下类型的实体，并为每个实体提供坐标位置、置信度和相关上下文：
-
+请提取以下类型的实体：
 1. IoC指标（IP地址、域名、文件哈希、URL）
 2. CVE漏洞编号
 3. 恶意软件名称
 4. APT组织名称
 5. 攻击技术和战术（MITRE ATT&CK）
-6. 文件类型和路径
-7. 地理位置
-8. 时间信息
 
-返回JSON格式，例如：
+请严格按照以下JSON格式返回，不要包含任何其他文字说明：
 {{
     "ioc": [
         {{
-            "value": "192.168.1.1",
-            "type": "ip",
-            "context": "发现恶意IP地址",
+            "value": "实际值",
+            "type": "ip/domain/hash/url",
+            "context": "上下文描述",
             "confidence": 0.95
         }}
     ],
     "cve": [
         {{
             "value": "CVE-2023-1234",
-            "severity": "high",
-            "context": "利用该漏洞进行攻击"
+            "severity": "high/medium/low",
+            "context": "利用描述"
         }}
     ],
-    "malware": [...],
-    "apt_groups": [...],
-    "techniques": [...],
-    "files": [...],
-    "locations": [...],
-    "timestamps": [...]
+    "malware": [
+        {{
+            "name": "恶意软件名称",
+            "family": "家族",
+            "type": "类型",
+            "description": "描述"
+        }}
+    ],
+    "apt_groups": [
+        {{
+            "name": "APT组织名称",
+            "aliases": ["别名1", "别名2"],
+            "origin": "国家/地区"
+        }}
+    ],
+    "techniques": [
+        {{
+            "id": "T1566.001",
+            "name": "技术名称",
+            "tactic": "战术"
+        }}
+    ]
 }}
 """
         
         try:
             response = self.generate_text(prompt, max_tokens=2048, temperature=0.1)
+            logger.debug(f"LLM原始响应: {response}")
+            
+            # 清理响应 - 移除可能的markdown代码块标记
+            cleaned_response = response.strip()
+            if cleaned_response.startswith("```json"):
+                cleaned_response = cleaned_response[7:]
+            if cleaned_response.startswith("```"):
+                cleaned_response = cleaned_response[3:]
+            if cleaned_response.endswith("```"):
+                cleaned_response = cleaned_response[:-3]
+            
+            cleaned_response = cleaned_response.strip()
+            
+            # 如果响应为空，返回空字典
+            if not cleaned_response:
+                logger.warning("LLM返回空响应")
+                return {}
+            
+            # 尝试解析JSON
             import json
-            return json.loads(response)
+            try:
+                result = json.loads(cleaned_response)
+                logger.info(f"成功解析实体: {len(result)} 个类型")
+                return result
+            except json.JSONDecodeError as json_error:
+                logger.error(f"JSON解析失败: {json_error}")
+                logger.error(f"清理后的响应: {cleaned_response[:200]}...")
+                
+                # 尝试修复常见的JSON问题
+                fixed_response = self._fix_json_response(cleaned_response)
+                if fixed_response:
+                    try:
+                        result = json.loads(fixed_response)
+                        logger.info("JSON修复成功")
+                        return result
+                    except json.JSONDecodeError:
+                        logger.error("JSON修复失败")
+                
+                # 如果JSON解析完全失败，尝试正则表达式提取
+                return self._fallback_entity_extraction(text)
+                
         except Exception as e:
             logger.error(f"高级威胁实体提取失败: {str(e)}")
-            return {}
+            # 降级到正则表达式提取
+            return self._fallback_entity_extraction(text)
+    
+    def _fix_json_response(self, response: str) -> Optional[str]:
+        """尝试修复常见的JSON格式问题"""
+        try:
+            # 尝试找到JSON对象的开始和结束
+            start_idx = response.find('{')
+            end_idx = response.rfind('}')
+            
+            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+                json_part = response[start_idx:end_idx + 1]
+                
+                # 修复常见问题
+                json_part = json_part.replace("'", '"')  # 单引号改双引号
+                json_part = json_part.replace('，', ',')  # 中文逗号改英文
+                json_part = json_part.replace('：', ':')  # 中文冒号改英文
+                
+                return json_part
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"JSON修复过程出错: {str(e)}")
+            return None
+    
+    def _fallback_entity_extraction(self, text: str) -> Dict[str, List[Dict[str, Any]]]:
+        """降级的正则表达式实体提取"""
+        import re
+        
+        entities = {
+            "ioc": [],
+            "cve": [],
+            "malware": [],
+            "apt_groups": [],
+            "techniques": []
+        }
+        
+        try:
+            # IP地址
+            ip_pattern = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+            for match in re.finditer(ip_pattern, text):
+                entities["ioc"].append({
+                    "value": match.group(),
+                    "type": "ip",
+                    "context": f"在位置{match.start()}-{match.end()}发现",
+                    "confidence": 0.8
+                })
+            
+            # 域名
+            domain_pattern = r'\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b'
+            for match in re.finditer(domain_pattern, text):
+                domain = match.group()
+                if '.' in domain and not domain.replace('.', '').isdigit():
+                    entities["ioc"].append({
+                        "value": domain,
+                        "type": "domain",
+                        "context": f"在位置{match.start()}-{match.end()}发现",
+                        "confidence": 0.7
+                    })
+            
+            # CVE
+            cve_pattern = r'CVE-\d{4}-\d{4,}'
+            for match in re.finditer(cve_pattern, text, re.IGNORECASE):
+                entities["cve"].append({
+                    "value": match.group(),
+                    "severity": "unknown",
+                    "context": f"在位置{match.start()}-{match.end()}发现"
+                })
+            
+            # APT组织
+            apt_pattern = r'\b(?:APT|apt)[\s-]?\d+\b'
+            for match in re.finditer(apt_pattern, text, re.IGNORECASE):
+                entities["apt_groups"].append({
+                    "name": match.group(),
+                    "aliases": [],
+                    "origin": "unknown"
+                })
+            
+            # MITRE技术
+            technique_pattern = r'T\d{4}(?:\.\d{3})?'
+            for match in re.finditer(technique_pattern, text):
+                entities["techniques"].append({
+                    "id": match.group(),
+                    "name": "unknown",
+                    "tactic": "unknown"
+                })
+            
+            # 恶意软件关键词
+            malware_keywords = ['malware', 'trojan', 'virus', 'ransomware', 'backdoor', 'rootkit']
+            for keyword in malware_keywords:
+                if keyword.lower() in text.lower():
+                    entities["malware"].append({
+                        "name": keyword,
+                        "family": "unknown",
+                        "type": keyword,
+                        "description": f"检测到关键词: {keyword}"
+                    })
+            
+            logger.info(f"正则表达式提取完成: {sum(len(v) for v in entities.values())} 个实体")
+            return entities
+            
+        except Exception as e:
+            logger.error(f"正则表达式提取失败: {str(e)}")
+            return entities
     
     def generate_threat_report(
         self,

@@ -5,13 +5,13 @@ from typing import List, Dict, Any, Optional
 from loguru import logger
 from .retriever import HybridRetriever
 from .generator import ResponseGenerator
-from ..document_processor.processor import ThreatIntelProcessor
 from ..vector_store.milvus_store import MilvusVectorStore
 from ..vector_store.embedder import EmbeddingGenerator
 from ..knowledge_graph.graph_builder import ThreatIntelGraphBuilder
 from ..knowledge_graph.graph_query import GraphQueryEngine
 from ..llm.deepseek_client import DeepSeekClient
 from ..utils.config import get_settings
+import time
 
 
 class ThreatIntelRAGEngine:
@@ -19,7 +19,6 @@ class ThreatIntelRAGEngine:
     
     def __init__(
         self,
-        processor: ThreatIntelProcessor = None,
         retriever: HybridRetriever = None,
         generator: ResponseGenerator = None,
         graph_builder: ThreatIntelGraphBuilder = None,
@@ -29,7 +28,6 @@ class ThreatIntelRAGEngine:
         初始化RAG引擎
         
         Args:
-            processor: 威胁情报处理器
             retriever: 混合检索器
             generator: 响应生成器
             graph_builder: 知识图谱构建器
@@ -42,7 +40,6 @@ class ThreatIntelRAGEngine:
             self._init_components()
         
         # 设置自定义组件
-        self.processor = processor or self.processor
         self.retriever = retriever or self.retriever
         self.generator = generator or self.generator
         self.graph_builder = graph_builder or self.graph_builder
@@ -75,14 +72,10 @@ class ThreatIntelRAGEngine:
                 base_url=self.settings.deepseek_base_url
             )
             
-            # 5. 初始化文档处理器
-            self.processor = ThreatIntelProcessor(
-                embedding_model=self.settings.embedding_model,
-                vector_store_config={
-                    'collection_name': 'threat_intel_rag',
-                    'embedding_dim': self.embedder.get_embedding_dim()
-                }
-            )
+            # 5. 初始化文档处理器（使用基础组件）
+            from ..document_processor import DocumentLoader, DocumentChunker
+            self.document_loader = DocumentLoader()
+            self.document_chunker = DocumentChunker()
             
             # 6. 初始化检索器
             self.retriever = HybridRetriever(
@@ -124,15 +117,39 @@ class ThreatIntelRAGEngine:
         try:
             logger.info(f"开始摄取文档: {source}")
             
-            # 1. 处理文档
-            result = self.processor.process_documents(
-                source=source,
-                source_type=source_type,
-                store_vectors=True,
-                return_chunks=build_knowledge_graph
-            )
+            # 1. 加载和分块文档
+            if source_type == "directory":
+                documents = self.document_loader.load_directory(source)
+            elif source_type == "file":
+                documents = self.document_loader.load_file(source)
+            elif source_type == "url":
+                documents = self.document_loader.load_from_url(source)
+            else:
+                raise ValueError(f"不支持的源类型: {source_type}")
+            chunks = self.document_chunker.chunk_documents(documents)
             
-            # 2. 构建知识图谱（可选）
+            # 2. 存储向量
+            vectors = []
+            for chunk in chunks:
+                embedding = self.embedder.get_embedding(chunk.content)
+                vectors.append({
+                    'id': chunk.chunk_id,
+                    'embedding': embedding,
+                    'metadata': chunk.metadata
+                })
+            
+            self.vector_store.insert_vectors(vectors)
+            
+            result = {
+                'chunks': chunks,
+                'stats': {
+                    'total_documents': len(documents),
+                    'total_chunks': len(chunks),
+                    'vectors_stored': len(vectors)
+                }
+            }
+            
+            # 3. 构建知识图谱（可选）
             if build_knowledge_graph and result.get('chunks'):
                 logger.info("开始构建知识图谱...")
                 graph_stats = self.graph_builder.build_graph_from_documents(
@@ -147,6 +164,281 @@ class ThreatIntelRAGEngine:
             
         except Exception as e:
             logger.error(f"文档摄取失败: {str(e)}")
+            return {'status': 'error', 'error': str(e)}
+    
+    def embed_and_store_documents(
+        self,
+        source: str,
+        source_type: str = "directory",
+        return_chunks: bool = True,
+        return_stats: bool = True
+    ) -> Dict[str, Any]:
+        """
+        文档嵌入和向量存储（不构建知识图谱）
+        
+        Args:
+            source: 文档源路径
+            source_type: 源类型 ("directory", "file", "url")
+            return_chunks: 是否返回分块数据
+            return_stats: 是否返回统计信息
+            
+        Returns:
+            包含分块数据和统计信息的字典
+        """
+        try:
+            logger.info(f"开始处理文档embedding和向量存储: {source}")
+            
+            # 1. 加载文档
+            logger.info("正在加载文档...")
+            if source_type == "directory":
+                documents = self.document_loader.load_directory(source)
+            elif source_type == "file":
+                documents = self.document_loader.load_file(source)
+            elif source_type == "url":
+                documents = self.document_loader.load_from_url(source)
+            else:
+                raise ValueError(f"不支持的源类型: {source_type}")
+            logger.info(f"成功加载 {len(documents)} 个文档")
+            
+            # 2. 文档分块
+            logger.info("正在进行文档分块...")
+            chunks = self.document_chunker.chunk_documents(documents)
+            logger.info(f"生成 {len(chunks)} 个文档分块")
+            
+            # 3. 生成embedding并存储到向量数据库
+            logger.info("正在生成embedding...")
+            vectors = []
+            failed_chunks = 0
+            
+            for i, chunk in enumerate(chunks):
+                try:
+                    # 生成embedding
+                    embedding = self.embedder.get_embedding(chunk.content)
+                    
+                    # 准备向量数据
+                    vector_data = {
+                        'id': chunk.chunk_id or f"chunk_{i}",
+                        'embedding': embedding,
+                        'metadata': {
+                            **chunk.metadata,
+                            'content': chunk.content,
+                            'source': chunk.metadata.get('source', ''),
+                            'chunk_index': i
+                        }
+                    }
+                    vectors.append(vector_data)
+                    
+                    if (i + 1) % 100 == 0:
+                        logger.info(f"已处理 {i + 1}/{len(chunks)} 个分块")
+                        
+                except Exception as e:
+                    logger.warning(f"处理分块 {i} 失败: {str(e)}")
+                    failed_chunks += 1
+                    continue
+            
+            # 4. 批量插入向量数据库
+            logger.info(f"正在存储 {len(vectors)} 个向量到数据库...")
+            self.vector_store.insert_vectors(vectors)
+            
+            # 5. 准备返回结果
+            result = {
+                'status': 'success',
+                'stats': {
+                    'total_documents': len(documents),
+                    'total_chunks': len(chunks),
+                    'successful_embeddings': len(vectors),
+                    'failed_chunks': failed_chunks,
+                    'vector_dimension': self.embedder.get_embedding_dim()
+                }
+            }
+            
+            if return_chunks:
+                result['chunks'] = chunks
+                result['documents'] = documents
+            
+            logger.info(f"文档embedding和向量存储完成: 成功 {len(vectors)}/{len(chunks)} 个分块")
+            
+            return result if return_stats else {'status': 'success'}
+            
+        except Exception as e:
+            logger.error(f"文档embedding和向量存储失败: {str(e)}")
+            return {'status': 'error', 'error': str(e)}
+    
+    def build_knowledge_graph_from_documents(
+        self,
+        chunks: List[Dict[str, Any]] = None,
+        source: str = None,
+        source_type: str = "directory",
+        extract_entities: bool = True,
+        return_stats: bool = True
+    ) -> Dict[str, Any]:
+        """
+        从文档构建知识图谱
+        
+        Args:
+            chunks: 已分块的文档数据（如果提供，则不再重新加载）
+            source: 文档源路径（如果chunks为None）
+            source_type: 源类型
+            extract_entities: 是否进行实体提取
+            return_stats: 是否返回统计信息
+            
+        Returns:
+            知识图谱构建结果和统计信息
+        """
+        try:
+            logger.info("开始构建知识图谱...")
+            
+            # 1. 获取文档分块
+            if chunks is None:
+                if source is None:
+                    raise ValueError("必须提供chunks或source参数")
+                
+                logger.info(f"重新加载文档: {source}")
+                if source_type == "directory":
+                    documents = self.document_loader.load_directory(source)
+                elif source_type == "file":
+                    documents = self.document_loader.load_file(source)
+                elif source_type == "url":
+                    documents = self.document_loader.load_from_url(source)
+                else:
+                    raise ValueError(f"不支持的源类型: {source_type}")
+                chunks = self.document_chunker.chunk_documents(documents)
+                logger.info(f"重新生成 {len(chunks)} 个文档分块")
+            else:
+                logger.info(f"使用提供的 {len(chunks)} 个文档分块")
+            
+            # 2. 使用图谱构建器构建知识图谱
+            logger.info("正在进行实体提取和关系构建...")
+            graph_stats = self.graph_builder.build_graph_from_documents(
+                chunks=chunks,
+                extract_entities=extract_entities
+            )
+            
+            # 3. 准备返回结果
+            result = {
+                'status': 'success',
+                'graph_stats': graph_stats,
+                'total_chunks_processed': len(chunks)
+            }
+            
+            logger.info(f"知识图谱构建完成:")
+            logger.info(f"- 创建节点: {graph_stats.get('created_nodes', 0)}")
+            logger.info(f"- 创建关系: {graph_stats.get('created_relationships', 0)}")
+            logger.info(f"- 提取实体: {graph_stats.get('extracted_entities', 0)}")
+            
+            return result if return_stats else {'status': 'success'}
+            
+        except Exception as e:
+            logger.error(f"知识图谱构建失败: {str(e)}")
+            return {'status': 'error', 'error': str(e)}
+    
+    def process_documents_pipeline(
+        self,
+        source: str,
+        source_type: str = "directory",
+        skip_embedding: bool = False,
+        skip_knowledge_graph: bool = False,
+        return_intermediate_results: bool = True
+    ) -> Dict[str, Any]:
+        """
+        完整的文档处理流水线
+        
+        Args:
+            source: 文档源路径
+            source_type: 源类型
+            skip_embedding: 是否跳过embedding和向量存储
+            skip_knowledge_graph: 是否跳过知识图谱构建
+            return_intermediate_results: 是否返回中间结果
+            
+        Returns:
+            完整的处理结果
+        """
+        try:
+            logger.info(f"开始文档处理流水线: {source}")
+            
+            pipeline_result = {
+                'status': 'success',
+                'pipeline_stats': {
+                    'start_time': time.time(),
+                    'stages_completed': []
+                }
+            }
+            
+            # 第一阶段：文档embedding和向量存储
+            if not skip_embedding:
+                logger.info("=== 流水线阶段1: 文档Embedding和向量存储 ===")
+                embedding_result = self.embed_and_store_documents(
+                    source=source,
+                    source_type=source_type,
+                    return_chunks=True,
+                    return_stats=True
+                )
+                
+                if embedding_result['status'] != 'success':
+                    raise Exception(f"Embedding阶段失败: {embedding_result.get('error', '未知错误')}")
+                
+                pipeline_result['embedding_result'] = embedding_result
+                pipeline_result['pipeline_stats']['stages_completed'].append('embedding')
+                
+                # 获取分块数据用于知识图谱构建
+                chunks = embedding_result.get('chunks', [])
+            else:
+                logger.info("跳过embedding和向量存储阶段")
+                chunks = None
+            
+            # 第二阶段：知识图谱构建
+            if not skip_knowledge_graph:
+                logger.info("=== 流水线阶段2: 知识图谱构建 ===")
+                graph_result = self.build_knowledge_graph_from_documents(
+                    chunks=chunks,
+                    source=source if chunks is None else None,
+                    source_type=source_type,
+                    extract_entities=True,
+                    return_stats=True
+                )
+                
+                if graph_result['status'] != 'success':
+                    logger.warning(f"知识图谱构建失败: {graph_result.get('error', '未知错误')}")
+                    pipeline_result['graph_result'] = graph_result
+                else:
+                    pipeline_result['graph_result'] = graph_result
+                    pipeline_result['pipeline_stats']['stages_completed'].append('knowledge_graph')
+            else:
+                logger.info("跳过知识图谱构建阶段")
+            
+            # 完成统计
+            pipeline_result['pipeline_stats']['end_time'] = time.time()
+            pipeline_result['pipeline_stats']['total_duration'] = (
+                pipeline_result['pipeline_stats']['end_time'] - 
+                pipeline_result['pipeline_stats']['start_time']
+            )
+            
+            # 汇总统计
+            summary_stats = {}
+            if 'embedding_result' in pipeline_result:
+                embedding_stats = pipeline_result['embedding_result']['stats']
+                summary_stats.update({
+                    'total_documents': embedding_stats.get('total_documents', 0),
+                    'total_chunks': embedding_stats.get('total_chunks', 0),
+                    'stored_vectors': embedding_stats.get('successful_embeddings', 0)
+                })
+            
+            if 'graph_result' in pipeline_result:
+                graph_stats = pipeline_result['graph_result']['graph_stats']
+                summary_stats.update({
+                    'created_nodes': graph_stats.get('created_nodes', 0),
+                    'created_relationships': graph_stats.get('created_relationships', 0),
+                    'extracted_entities': graph_stats.get('extracted_entities', 0)
+                })
+            
+            pipeline_result['summary_stats'] = summary_stats
+            
+            logger.info(f"文档处理流水线完成，耗时: {pipeline_result['pipeline_stats']['total_duration']:.2f}秒")
+            
+            return pipeline_result
+            
+        except Exception as e:
+            logger.error(f"文档处理流水线失败: {str(e)}")
             return {'status': 'error', 'error': str(e)}
     
     def query(

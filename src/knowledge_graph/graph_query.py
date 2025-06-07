@@ -456,3 +456,412 @@ class GraphQueryEngine:
         except Exception as e:
             logger.error(f"获取实体时间线失败: {str(e)}")
             return [] 
+# ========== 子图匹配算法方法 ==========
+    
+    def find_subgraph_pattern(
+        self,
+        pattern: Dict[str, Any],
+        max_results: int = 100
+    ) -> List[Dict[str, Any]]:
+        """
+        基于模式进行子图匹配
+        
+        Args:
+            pattern: 匹配模式，格式如：
+            {
+                "nodes": [
+                    {"var": "a", "label": "IoC", "properties": {"type": "ip"}},
+                    {"var": "b", "label": "Malware"}
+                ],
+                "relationships": [
+                    {"from": "a", "to": "b", "type": "INDICATES", "direction": "->"}
+                ]
+            }
+            max_results: 最大结果数
+            
+        Returns:
+            匹配的子图列表
+        """
+        try:
+            # 构建MATCH子句
+            match_clauses = []
+            where_clauses = []
+            params = {}
+            return_vars = []
+            
+            # 处理节点
+            for node in pattern.get("nodes", []):
+                var = node["var"]
+                label = node.get("label", "")
+                properties = node.get("properties", {})
+                
+                label_part = f":{label}" if label else ""
+                match_clauses.append(f"({var}{label_part})")
+                return_vars.append(var)
+                
+                # 添加属性条件
+                for prop_key, prop_value in properties.items():
+                    param_key = f"{var}_{prop_key}"
+                    where_clauses.append(f"{var}.{prop_key} = ${param_key}")
+                    params[param_key] = prop_value
+            
+            # 处理关系
+            for rel in pattern.get("relationships", []):
+                from_var = rel["from"]
+                to_var = rel["to"]
+                rel_type = rel.get("type", "")
+                direction = rel.get("direction", "->")
+                
+                rel_part = f":{rel_type}" if rel_type else ""
+                
+                if direction == "->":
+                    match_clauses.append(f"({from_var})-[r_{from_var}_{to_var}{rel_part}]->({to_var})")
+                elif direction == "<-":
+                    match_clauses.append(f"({from_var})<-[r_{from_var}_{to_var}{rel_part}]-({to_var})")
+                else:  # 无方向
+                    match_clauses.append(f"({from_var})-[r_{from_var}_{to_var}{rel_part}]-({to_var})")
+                
+                return_vars.append(f"r_{from_var}_{to_var}")
+            
+            # 构建查询
+            match_clause = "MATCH " + ", ".join(match_clauses)
+            where_clause = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+            return_clause = f"RETURN {', '.join(return_vars)}"
+            limit_clause = f"LIMIT {max_results}"
+            
+            query = f"{match_clause} {where_clause} {return_clause} {limit_clause}"
+            
+            logger.info(f"执行子图模式匹配: {query}")
+            return self.run_query(query, params)
+            
+        except Exception as e:
+            logger.error(f"子图模式匹配失败: {str(e)}")
+            raise
+    
+    def find_paths_between_nodes(
+        self,
+        start_node: Dict[str, Any],
+        end_node: Dict[str, Any],
+        max_length: int = 5,
+        relationship_types: List[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        查找两个节点之间的路径
+        
+        Args:
+            start_node: 起始节点条件
+            end_node: 结束节点条件
+            max_length: 最大路径长度
+            relationship_types: 允许的关系类型
+            
+        Returns:
+            路径列表
+        """
+        try:
+            # 构建节点匹配条件
+            start_condition = self._build_node_condition("start", start_node)
+            end_condition = self._build_node_condition("end", end_node)
+            
+            # 构建关系类型过滤
+            rel_filter = ""
+            if relationship_types:
+                rel_types = "|".join(relationship_types)
+                rel_filter = f":{rel_types}"
+            
+            query = f"""
+            MATCH {start_condition}, {end_condition}
+            MATCH path = (start)-[{rel_filter}*1..{max_length}]-(end)
+            RETURN path, length(path) as path_length
+            ORDER BY path_length
+            """
+            
+            params = {**start_node, **end_node}
+            return self.run_query(query, params)
+            
+        except Exception as e:
+            logger.error(f"路径查找失败: {str(e)}")
+            raise
+    
+    def find_shortest_path(
+        self,
+        start_node: Dict[str, Any],
+        end_node: Dict[str, Any],
+        relationship_types: List[str] = None
+    ) -> Dict[str, Any]:
+        """
+        查找最短路径
+        
+        Args:
+            start_node: 起始节点条件
+            end_node: 结束节点条件
+            relationship_types: 允许的关系类型
+            
+        Returns:
+            最短路径信息
+        """
+        try:
+            start_condition = self._build_node_condition("start", start_node)
+            end_condition = self._build_node_condition("end", end_node)
+            
+            rel_filter = ""
+            if relationship_types:
+                rel_types = "|".join(relationship_types)
+                rel_filter = f":{rel_types}"
+            
+            query = f"""
+            MATCH {start_condition}, {end_condition}
+            MATCH path = shortestPath((start)-[{rel_filter}*]-(end))
+            RETURN path, length(path) as path_length
+            """
+            
+            params = {**start_node, **end_node}
+            result = self.run_query(query, params)
+            return result[0] if result else None
+            
+        except Exception as e:
+            logger.error(f"最短路径查找失败: {str(e)}")
+            raise
+    
+    def find_k_hop_neighbors(
+        self,
+        center_node: Dict[str, Any],
+        k: int = 2,
+        relationship_types: List[str] = None,
+        node_labels: List[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        查找K跳邻居节点
+        
+        Args:
+            center_node: 中心节点条件
+            k: 跳数
+            relationship_types: 关系类型过滤
+            node_labels: 节点标签过滤
+            
+        Returns:
+            邻居节点列表
+        """
+        try:
+            center_condition = self._build_node_condition("center", center_node)
+            
+            # 构建关系过滤
+            rel_filter = ""
+            if relationship_types:
+                rel_types = "|".join(relationship_types)
+                rel_filter = f":{rel_types}"
+            
+            # 构建节点标签过滤
+            neighbor_labels = ""
+            if node_labels:
+                neighbor_labels = ":" + "|".join(node_labels)
+            
+            query = f"""
+            MATCH {center_condition}
+            MATCH (center)-[{rel_filter}*1..{k}]-(neighbor{neighbor_labels})
+            WHERE neighbor <> center
+            RETURN DISTINCT neighbor, 
+                   shortestPath((center)-[*]-(neighbor)) as path,
+                   length(shortestPath((center)-[*]-(neighbor))) as distance
+            ORDER BY distance
+            """
+            
+            params = center_node.copy()
+            return self.run_query(query, params)
+            
+        except Exception as e:
+            logger.error(f"K跳邻居查找失败: {str(e)}")
+            raise
+    
+    def extract_subgraph(
+        self,
+        central_nodes: List[Dict[str, Any]],
+        max_depth: int = 2,
+        max_nodes: int = 100
+    ) -> Dict[str, Any]:
+        """
+        提取以指定节点为中心的子图
+        
+        Args:
+            central_nodes: 中心节点列表
+            max_depth: 最大深度
+            max_nodes: 最大节点数
+            
+        Returns:
+            子图数据
+        """
+        try:
+            # 构建中心节点匹配条件
+            center_conditions = []
+            params = {}
+            
+            for i, node in enumerate(central_nodes):
+                condition = self._build_node_condition(f"center{i}", node)
+                center_conditions.append(f"MATCH {condition}")
+                
+                # 添加参数
+                for key, value in node.items():
+                    if key != 'label':
+                        params[f"center{i}_{key}"] = value
+            
+            centers_match = "\n".join(center_conditions)
+            centers_collect = ", ".join([f"center{i}" for i in range(len(central_nodes))])
+            
+            query = f"""
+            {centers_match}
+            WITH [{centers_collect}] as centers
+            CALL {{
+                WITH centers
+                UNWIND centers as center
+                MATCH (center)-[*0..{max_depth}]-(node)
+                RETURN collect(DISTINCT node) as nodes
+            }}
+            WITH nodes[0..{max_nodes}] as limited_nodes
+            UNWIND limited_nodes as n
+            OPTIONAL MATCH (n)-[r]-(m)
+            WHERE m IN limited_nodes
+            RETURN collect(DISTINCT n) as nodes, 
+                   collect(DISTINCT r) as relationships
+            """
+            
+            result = self.run_query(query, params)
+            return result[0] if result else {"nodes": [], "relationships": []}
+            
+        except Exception as e:
+            logger.error(f"子图提取失败: {str(e)}")
+            raise
+    
+    def find_similar_subgraphs(
+        self,
+        template_subgraph: Dict[str, Any],
+        similarity_threshold: float = 0.7
+    ) -> List[Dict[str, Any]]:
+        """
+        查找相似的子图结构
+        
+        Args:
+            template_subgraph: 模板子图
+            similarity_threshold: 相似度阈值
+            
+        Returns:
+            相似子图列表
+        """
+        try:
+            # 这里实现基于图结构相似性的匹配
+            # 简化版本：基于节点标签和关系类型的相似性
+            
+            template_labels = template_subgraph.get("node_labels", [])
+            template_rel_types = template_subgraph.get("relationship_types", [])
+            
+            # 查找具有相似标签组合的子图
+            if template_labels:
+                labels_condition = " OR ".join([f"'{label}' IN labels(n)" for label in template_labels])
+                
+                query = f"""
+                MATCH (n)-[r]-(m)
+                WHERE {labels_condition}
+                WITH n, r, m
+                WHERE any(label IN labels(m) WHERE label IN {template_labels})
+                RETURN collect(DISTINCT n) as nodes, 
+                       collect(DISTINCT r) as relationships,
+                       collect(DISTINCT labels(n)) as node_labels,
+                       collect(DISTINCT type(r)) as rel_types
+                """
+                
+                return self.run_query(query)
+            
+            return []
+            
+        except Exception as e:
+            logger.error(f"相似子图查找失败: {str(e)}")
+            raise
+    
+    def analyze_graph_motifs(
+        self,
+        motif_size: int = 3,
+        min_frequency: int = 2
+    ) -> List[Dict[str, Any]]:
+        """
+        分析图中的常见模式（motifs）
+        
+        Args:
+            motif_size: 模式大小（节点数）
+            min_frequency: 最小频率
+            
+        Returns:
+            常见模式列表
+        """
+        try:
+            if motif_size == 3:
+                # 三节点模式分析
+                query = """
+                MATCH (a)-[r1]-(b)-[r2]-(c)
+                WHERE a <> c
+                WITH labels(a)[0] as label_a, 
+                     type(r1) as rel1, 
+                     labels(b)[0] as label_b,
+                     type(r2) as rel2, 
+                     labels(c)[0] as label_c
+                WHERE label_a IS NOT NULL AND label_b IS NOT NULL AND label_c IS NOT NULL
+                WITH label_a + '-' + rel1 + '-' + label_b + '-' + rel2 + '-' + label_c as pattern
+                RETURN pattern, count(*) as frequency
+                HAVING frequency >= $min_frequency
+                ORDER BY frequency DESC
+                """
+                
+                return self.run_query(query, {"min_frequency": min_frequency})
+            
+            return []
+            
+        except Exception as e:
+            logger.error(f"图模式分析失败: {str(e)}")
+            raise
+    
+    def compute_centrality_measures(
+        self,
+        node_label: str = None,
+        algorithms: List[str] = None
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        计算节点中心性指标
+        
+        Args:
+            node_label: 节点标签过滤
+            algorithms: 中心性算法列表 ["degree", "betweenness", "closeness", "pagerank"]
+            
+        Returns:
+            中心性指标结果
+        """
+        try:
+            if algorithms is None:
+                algorithms = ["degree"]
+            
+            results = {}
+            label_filter = f":{node_label}" if node_label else ""
+            
+            for algorithm in algorithms:
+                if algorithm == "degree":
+                    query = f"""
+                    MATCH (n{label_filter})-[r]-(m)
+                    WITH n, count(r) as degree
+                    RETURN n, degree
+                    ORDER BY degree DESC
+                    LIMIT 50
+                    """
+                    results["degree"] = self.run_query(query)
+                
+                elif algorithm == "pagerank":
+                    # 简化的PageRank计算
+                    query = f"""
+                    MATCH (n{label_filter})
+                    WITH n, size((n)--()) as connections
+                    RETURN n, connections as pagerank_score
+                    ORDER BY pagerank_score DESC
+                    LIMIT 50
+                    """
+                    results["pagerank"] = self.run_query(query)
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"中心性计算失败: {str(e)}")
+            raise 
